@@ -113,12 +113,13 @@ public class ScriptVM extends AbstractInjector
 
 		// Next 4 should be injected by mixins, so don't need fail fast
 		final Method runScript = vanillaClient.findStaticMethod("copy$runScript");
+		final Method runScriptLogic = vanillaClient.findStaticMethod("copy$runScriptLogic");
 		final Method vmExecuteOpcode = vanillaClient.findStaticMethod("vmExecuteOpcode");
 		final Method setCurrentScript = vanillaClient.findStaticMethod("setCurrentScript");
 		final Field currentScriptPCField = vanillaClient.findField("currentScriptPC");
 
 		Execution e = new Execution(inject.getVanilla());
-		e.addMethod(runScript);
+		e.addMethod(runScriptLogic);
 		e.noInvoke = true;
 
 		AtomicReference<MethodContext> pcontext = new AtomicReference<>(null);
@@ -126,7 +127,7 @@ public class ScriptVM extends AbstractInjector
 		e.addMethodContextVisitor(pcontext::set);
 		e.run();
 
-		Instructions instrs = runScript.getCode().getInstructions();
+		Instructions instrs = runScriptLogic.getCode().getInstructions();
 
 		Set<AStore> scriptStores = new HashSet<>();
 		Integer pcLocalVar = null;
@@ -300,5 +301,23 @@ public class ScriptVM extends AbstractInjector
 		instrs.addInstruction(istorepc + 1, new ILoad(instrs, currentOpcodeStore.getVariableIndex()));
 		instrs.addInstruction(istorepc + 2, new InvokeStatic(instrs, vmExecuteOpcode.getPoolMethod()));
 		instrs.addInstruction(istorepc + 3, new IfNe(instrs, nextIteration));
+
+		Instructions runScriptInstrs = runScript.getCode().getInstructions();
+		ListIterator<Instruction> instrIter = runScriptInstrs.getInstructions().listIterator();
+		while (instrIter.hasNext())
+		{
+			Instruction instr = instrIter.next();
+
+			if (instr instanceof InvokeStatic)
+			{
+				InvokeStatic invokeStatic = (InvokeStatic) instr;
+				if(invokeStatic.getMethod().getType().getReturnValue().toString().equals("L"+scriptObName+";"))
+				{
+					instrIter.add(new Dup(instrs));
+					instrIter.add(new InvokeStatic(instrs, setCurrentScript.getPoolMethod()));
+					instrIter.next();
+				}
+			}
+		}
 	}
 }
