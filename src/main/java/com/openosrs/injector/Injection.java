@@ -22,6 +22,7 @@ import com.openosrs.injector.injectors.raw.CopyRuneLiteClasses;
 import com.openosrs.injector.injectors.raw.DrawMenu;
 import com.openosrs.injector.injectors.raw.GameDrawingMode;
 import com.openosrs.injector.injectors.raw.GraphicsObject;
+import com.openosrs.injector.injectors.raw.JagexLauncherCredentials;
 import com.openosrs.injector.injectors.raw.Occluder;
 import com.openosrs.injector.injectors.raw.RasterizerAlpha;
 import com.openosrs.injector.injectors.raw.RenderDraw;
@@ -113,6 +114,8 @@ public class Injection extends InjectData implements InjectTaskHandler
 		inject(new AddPlayerToMenu(this));
 
 		inject(new RuneliteMenuEntry(this));
+
+		inject(new JagexLauncherCredentials(this));
 
 		validate(new InjectorValidator(this));
 
