@@ -43,7 +43,8 @@ public class CopyRuneLiteClasses extends AbstractInjector
 		"RuneLiteIterableNodeHashTable",
 		"RuneLiteMenuEntry",
 		"RuneLiteObject",
-		"RuneLiteRasterizer"
+		"RuneLiteRasterizer",
+		"RuneLiteWorldView"
 	);
 
 
